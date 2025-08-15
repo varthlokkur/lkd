@@ -1,0 +1,7 @@
+obj-m += ex_list.o
+ex_list-y := src/klist.o src/ex_list.o
+
+#obj-m += src/ex_queue.o
+#obj-m += src/ex_bitmap.o
+#obj-m += src/ex_rb_tree.o
+#obj-m += src/ex_bin_search.o
