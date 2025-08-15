@@ -1,0 +1,2 @@
+obj-m += src/ex_tasklets.o
+obj-m += src/ex_workqueue.o
