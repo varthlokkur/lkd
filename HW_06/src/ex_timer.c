@@ -1,3 +1,5 @@
+#define pr_fmt(fmt) "ex_timer: " fmt
+
 #include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -6,10 +8,9 @@
 #include <linux/hrtimer.h>
 #include <linux/jiffies.h>
 
-#define pr_fmt(fmt) "ex_timer: " fmt
-
 #define TIMER_PERIOD 30 // 30 sec
 #define STOP_INTERVAL 5 * 60 // 5 min
+#define SECONDS_IN_MINUTE 60
 
 struct timer_private {
 	unsigned long stop_timepoint;
@@ -21,13 +22,16 @@ struct timer_private {
 static void timer_handler(struct timer_list *t)
 {
 	struct timer_private *data = from_timer(data, t, timer_handle);
+	if (time_before_eq(jiffies, data->stop_timepoint)) {
+		const int elapsed_seconds =
+			(jiffies - data->start_timepoint) / HZ;
+		pr_info("min=%d: Hello, timer!\n",
+			elapsed_seconds / SECONDS_IN_MINUTE);
 
-	pr_info("min=%d: Hello, timer!\n",
-		((jiffies - data->start_timepoint) / HZ));
-
-	if (time_before(jiffies, data->stop_timepoint)) {
 		mod_timer(&timer_singleton.timer_handle,
 			  jiffies + msecs_to_jiffies(TIMER_PERIOD * 1000));
+	} else {
+		pr_info("timer completed work!\n");
 	}
 }
 
@@ -36,12 +40,16 @@ static enum hrtimer_restart hrtimer_handler(struct hrtimer *hr)
 	struct timer_private *data =
 		container_of(hr, struct timer_private, hrtimer_handle);
 
-	pr_info("min=%d: Hello, hrtimer!\n",
-		((jiffies - data->start_timepoint) / HZ));
+	if (time_before_eq(jiffies, data->stop_timepoint)) {
+		const int elapsed_seconds =
+			(jiffies - data->start_timepoint) / HZ;
+		pr_info("min=%d: Hello, hrtimer!\n",
+			elapsed_seconds / SECONDS_IN_MINUTE);
 
-	if (time_before(jiffies, data->stop_timepoint)) {
 		hrtimer_forward_now(hr, ktime_set(TIMER_PERIOD, 0));
 		return HRTIMER_RESTART;
+	} else {
+		pr_info("hrtimer completed work!\n");
 	}
 
 	return HRTIMER_NORESTART;

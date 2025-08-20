@@ -15,7 +15,7 @@ RMMOD = rmmod
 
 $(shell mkdir -p $(BUILD_DIR))
 
-kbuild:
+make:
 	$(MAKE) -C $(KERNEL_DIR) M=$(PWD) modules
 	mv $(BUILD_FILES) $(BUILD_DIR)/.
 
@@ -31,4 +31,4 @@ load:
 unload:
 	$(RMMOD) ex_timer
 
-.PHONY: kbuild clean format
+.PHONY: make clean format
