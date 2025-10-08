@@ -13,6 +13,9 @@ FORMAT_FILES := $(SRC_DIR)/*.c
 INSMOD = insmod
 RMMOD = rmmod
 
+CC := gcc
+CC_FLAGS := -Wall -Wextra -Werror
+
 $(shell mkdir -p $(BUILD_DIR))
 
 make:
@@ -30,6 +33,11 @@ load:
 
 unload:
 	$(RMMOD) clkd
-	
+
+app:
+	$(CC) -c $(SRC_DIR)/device_test_app.c -o $(BUILD_DIR)/device_test_app.o
+	$(CC) $(CC_FLAGS) $(BUILD_DIR)/device_test_app.o -o $(BUILD_DIR)/device_test_app
+	@echo -e Test app compiled!$(NC)
+
 
 .PHONY: make clean format
