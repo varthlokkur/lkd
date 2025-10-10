@@ -13,7 +13,7 @@ int calculate_encoding_size(int input_len)
 
 int calculate_decoding_size(int input_len)
 {
-	return (((input_len / 4) * 3) - 2) + 1;
+	return ((input_len / 4) * 3) + 1;
 }
 
 int base64_encode(const unsigned char *input, int input_len, char *output,
@@ -51,6 +51,8 @@ int base64_encode(const unsigned char *input, int input_len, char *output,
 						    '=';
 	}
 	output[j] = '\0';
+
+	pr_info("Encoded %d input bytes to %d output bytes\n", input_len, j);
 	return j;
 }
 
@@ -69,9 +71,10 @@ int base64_decode(const char *input, int input_len, unsigned char *output,
 	}
 
 	if (!output) {
-		pr_info("Calculate output bytes by input bytes %d\n",
-			input_len);
-		return calculate_decoding_size(input_len);
+		output_len = calculate_decoding_size(input_len);
+		pr_info("Calculate output bytes by input bytes %d - %d\n",
+			input_len, output_len);
+		return output_len;
 	}
 
 	j = 0;
@@ -112,5 +115,7 @@ int base64_decode(const char *input, int input_len, unsigned char *output,
 		if (j < output_len && input[i + 3] != '=')
 			output[j++] = (c << 6) | d;
 	}
+
+	pr_info("Decoded %d input bytes to %d output bytes\n", input_len, j);
 	return j;
 }

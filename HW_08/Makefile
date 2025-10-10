@@ -21,7 +21,7 @@ CC_FLAGS := -Wall -Wextra -Werror
 
 $(shell mkdir -p $(BUILD_DIR))
 
-make:
+module:
 	$(MAKE) -C $(KERNEL_DIR) M=$(PWD) modules
 	mv $(BUILD_FILES) $(BUILD_DIR)/.
 
@@ -42,7 +42,7 @@ tests:
 	$(CC) -c $(SRC_TEST_DIR)/device_test_app.c -o $(BUILD_DIR)/device_test_app.o
 	$(CC) $(CC_FLAGS) $(BUILD_DIR)/device_test_app.o -o $(BUILD_DIR)/device_test_app
 	cp $(TEST_SCRIPTS_FILES) $(BUILD_DIR)/.
-	@echo -e Test app compiled!$(NC)
 
+all: clean tests module
 
-.PHONY: make clean format tests
+.PHONY: all

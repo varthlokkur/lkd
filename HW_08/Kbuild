@@ -1,2 +1,2 @@
 obj-m += clkd.o
-clkd-objs := src/main.o src/process_operations.o src/base64.o src/glob_operations.o
+clkd-objs := src/main.o src/process_operations.o src/base64.o src/glob_operations.o src/procfs_operations.o src/sysfs_operations.o

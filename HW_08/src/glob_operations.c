@@ -39,6 +39,8 @@ const struct file_operations *global_fops(void)
 
 void reset_global_buffers(void)
 {
+	pr_info("Global buffers reset command\n");
+
 	mutex_lock(&clkd_device_lock);
 	kfree(global_buffer.buffer);
 	global_buffer.buffer = NULL;
@@ -60,7 +62,7 @@ ssize_t clkd_glob_read(struct file *file, char __user *ubuf, size_t size,
 	if (!global_buffer.buffer) {
 		mutex_unlock(&clkd_device_lock);
 		pr_warn("[FAIL] cannot get device data to read\n");
-		return -ENODEV;
+		return 0;
 	}
 
 	if (*offset >= global_buffer.size) {
@@ -96,7 +98,6 @@ ssize_t clkd_glob_write(struct file *file, const char __user *ubuf, size_t size,
 	// Allocate input buffer
 	char *input_buffer = kmalloc(size, GFP_KERNEL);
 	if (!input_buffer) {
-		mutex_unlock(&clkd_device_lock);
 		pr_err("[FAIL] cannot allocate buffer to copy user data to write\n");
 		return -ENOMEM;
 	}
@@ -104,8 +105,6 @@ ssize_t clkd_glob_write(struct file *file, const char __user *ubuf, size_t size,
 	// Copy data from userspace
 	if (copy_from_user(input_buffer, ubuf, size)) {
 		kfree(input_buffer);
-		mutex_unlock(&clkd_device_lock);
-
 		pr_err("[FAIL] cannot copy user data to write\n");
 		return -EFAULT;
 	}

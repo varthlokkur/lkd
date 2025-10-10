@@ -1,6 +1,8 @@
 #ifndef __CLKD_MODULE_DEFS_H__
 #define __CLKD_MODULE_DEFS_H__
 
+#define pr_fmt(fmt) "clkd: " fmt
+
 #include <linux/types.h>
 #include <linux/mutex.h>
 
@@ -8,6 +10,12 @@
 #define CLASS_NAME "clkd"
 #define DEVICE_IOCTL_MAGIC 'v'
 
+// procfs files and dirs
+#define PROC_DEVICE_DIR_NAME "clkd"
+#define PROC_RESET_FILE_NAME "reset"
+
+// sysfs attrs
+#define SYSFS_RESET_ATTR_NAME "reset"
 
 // Processing data modes
 typedef enum {

@@ -1,8 +1,8 @@
-#define pr_fmt(fmt) "clkd: " fmt
-
 #include "defs.h"
 #include "process_operations.h"
 #include "glob_operations.h"
+#include "procfs_operations.h"
+#include "sysfs_operations.h"
 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
@@ -131,7 +131,7 @@ static int __init mod_init(void)
 	clkd_device =
 		device_create(clkd_class, NULL, clkd_dev, NULL, DEVICE_NAME);
 	if (IS_ERR(clkd_device)) {
-		pr_err("Failed to create device\n");
+		pr_err("[FAIL] Failed to create device\n");
 		class_destroy(clkd_class);
 		cdev_del(&clkd_cdev);
 		unregister_chrdev_region(clkd_dev, 1);
@@ -140,7 +140,31 @@ static int __init mod_init(void)
 
 	pr_info("Device created maj: %d min: %d\n", clkd_major, clkd_minor);
 
-	// need register in sysfs/procfs
+	// register in sysfs/procfs
+	result = register_procfs();
+	if (result < 0) {
+		pr_err("Failed to create procfs files\n");
+
+		device_destroy(clkd_class, clkd_dev);
+		class_destroy(clkd_class);
+		cdev_del(&clkd_cdev);
+		unregister_chrdev_region(clkd_dev, 1);
+
+		return result;
+	}
+
+	result = register_sysfs(clkd_device);
+	if (result < 0) {
+		pr_err("Failed to create sysfs files\n");
+
+		unregister_procfs();
+		device_destroy(clkd_class, clkd_dev);
+		class_destroy(clkd_class);
+		cdev_del(&clkd_cdev);
+		unregister_chrdev_region(clkd_dev, 1);
+
+		return result;
+	}
 
 	pr_info("Initialization complete\n");
 	return 0;
@@ -151,6 +175,9 @@ static void __exit mod_exit(void)
 	pr_info("Exiting\n");
 
 	reset_global_buffers();
+
+	unregister_procfs();
+	unregister_sysfs(clkd_device);
 
 	device_destroy(clkd_class, clkd_dev);
 	class_destroy(clkd_class);
